@@ -21,28 +21,6 @@ func main() {
 	rl.InitWindow(windowWidth, windowHeight, "game dev journey")
 	defer rl.CloseWindow()
 
-	colors := []rl.Color{rl.Red, rl.Green, rl.Blue, rl.Yellow, rl.Purple, rl.Orange, rl.Pink}
-	triangles := []Triangle{
-		{A: rl.NewVector2(400, 100), B: rl.NewVector2(200, 300), C: rl.NewVector2(600, 300)},
-	}
-
-	iteration := 6
-	for i := 0; i < iteration; i++ {
-		numTriangles := len(triangles)
-		for j := 0; j < numTriangles; j++ {
-			firstTriangle := triangles[0]
-			triangles = triangles[1:]
-
-			mAB := midpoint(firstTriangle.A, firstTriangle.B)
-			mBC := midpoint(firstTriangle.B, firstTriangle.C)
-			mAC := midpoint(firstTriangle.A, firstTriangle.C)
-
-			triangles = append(triangles, Triangle{A: firstTriangle.A, B: mAB, C: mAC})
-			triangles = append(triangles, Triangle{A: mAB, B: firstTriangle.B, C: mBC})
-			triangles = append(triangles, Triangle{A: mAC, B: mBC, C: firstTriangle.C})
-		}
-	}
-
 	rl.SetTargetFPS(60)
 
 	for !rl.WindowShouldClose() {
@@ -50,10 +28,17 @@ func main() {
 
 		rl.ClearBackground(rl.Violet)
 
-		// Draw all triangles
-		for index, triangle := range triangles {
-			rl.DrawTriangle(triangle.A, triangle.B, triangle.C, colors[index%len(colors)])
-		}
+		A := rl.NewVector2(400, 100)
+		B := rl.NewVector2(200, 300)
+		C := rl.NewVector2(600, 300)
+
+		rl.DrawTriangle(A, B, C, rl.Blue)
+		rl.DrawCircleV(A, 5, rl.Red)
+		rl.DrawCircleV(B, 5, rl.Yellow)
+		rl.DrawCircleV(C, 5, rl.Brown)
+
+		centerOfMass := rl.Vector2Scale(rl.Vector2Add(C, rl.Vector2Add(A, B)), 1/3.0)
+		rl.DrawLineV(rl.NewVector2(200, 100), centerOfMass, rl.Purple)
 
 		rl.EndDrawing()
 	}
