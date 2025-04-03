@@ -1,0 +1,7 @@
+# Executables
+*.exe
+*.out
+*.app
+
+# Debug files
+__debug_bin*
