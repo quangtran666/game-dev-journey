@@ -1,0 +1,84 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Cấu hình để debug package main trong thư mục hiện tại hoặc file đang mở
+      // Nó sẽ build và chạy file/package hiện tại.
+      "name": "Launch Current Package/File", // Tên hiển thị trong danh sách debug
+      "type": "go", // Loại debugger (cần extension Go của VS Code)
+      "request": "launch", // Kiểu request: "launch" để bắt đầu mới, "attach" để gắn vào process đang chạy
+      "mode": "auto", // Chế độ: "auto" tự phát hiện file/package, "debug" cho file/package, "test" cho test, "exec" cho file thực thi đã build
+      "program": "${fileDirname}", // Đường dẫn đến chương trình cần debug. "${fileDirname}" debug package chứa file đang mở. Bạn có thể thay bằng "${workspaceFolder}" để debug package ở gốc workspace, hoặc đường dẫn cụ thể như "${workspaceFolder}/cmd/myapp".
+      "cwd": "${workspaceFolder}", // Thư mục làm việc hiện tại khi chạy debug
+      "env": {}, // Biến môi trường (ví dụ: {"MY_VAR": "value"})
+      "args": [], // Các tham số dòng lệnh truyền cho chương trình (ví dụ: ["--port", "8080"])
+      "buildFlags": "" // Các cờ build truyền cho "go build" (ví dụ: "-tags=dev -ldflags='-X main.version=1.0'")
+      // "showLog": true,                   // Bỏ comment nếu muốn xem log chi tiết từ Delve (debugger)
+    },
+    {
+      // Cấu hình để debug một file thực thi Go đã được build sẵn
+      "name": "Launch Executable File",
+      "type": "go",
+      "request": "launch",
+      "mode": "exec",
+      "program": "${workspaceFolder}/go-raylib-binding/mygame.exe", // !!! THAY THẾ bằng đường dẫn đến file thực thi của bạn
+      "cwd": "${workspaceFolder}",
+      "env": {},
+      "args": []
+    },
+    {
+      // Cấu hình để debug các hàm test trong file hiện tại
+      "name": "Debug Test Current File",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${fileDirname}", // Debug package chứa file test đang mở
+      "args": [
+        "-test.v" // Chạy test ở chế độ verbose (hiển thị chi tiết)
+        // "-test.run", "TestMyFunction"  // Bỏ comment và thay "TestMyFunction" bằng tên test cụ thể (hoặc regex) nếu chỉ muốn chạy 1 test
+      ],
+      "buildFlags": "" // Có thể thêm build tags nếu test cần: "-tags=integration"
+    },
+    {
+      // Cấu hình để debug một hàm test cụ thể (bạn cần chọn tên hàm test trong editor trước khi chạy)
+      "name": "Debug Test Specific Function",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${fileDirname}",
+      "args": [
+        "-test.v",
+        "-test.run",
+        "^${selectedText}$" // Lấy tên hàm test bạn đã bôi đen trong VS Code
+      ],
+      "buildFlags": ""
+    },
+    {
+      // Cấu hình để gắn (attach) debugger vào một process Go đang chạy
+      // Bạn cần chạy process Go với Delve trước:
+      // Ví dụ: dlv debug --headless --listen=:2345 --api-version=2 ./yourpackage
+      // Hoặc: dlv attach <pid> --headless --listen=:2345 --api-version=2
+      "name": "Attach to Running Process",
+      "type": "go",
+      "request": "attach",
+      "mode": "local", // Hoặc "remote" nếu Delve chạy trên máy khác
+      "remotePath": "", // Chỉ cần thiết nếu mode là "remote" và đường dẫn source code trên máy remote khác local
+      "port": 2345, // Port mà Delve đang lắng nghe
+      "host": "127.0.0.1", // Host mà Delve đang lắng nghe (thường là localhost)
+      // "processId": 0, // Nếu dùng dlv attach <pid>, bạn có thể dùng ${command:pickProcess} để VS Code hiện cửa sổ chọn process
+      "cwd": "${workspaceFolder}",
+      "showLog": true
+    },
+    {
+      "name": "Launch Main Package",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/go-raylib-binding",
+      "cwd": "${workspaceFolder}",
+      "env": {},
+      "args": [],
+      "buildFlags": ""
+    }
+  ]
+}
