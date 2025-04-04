@@ -32,15 +32,15 @@ func main() {
 		wall.NewWall(windowWidth-wallThickness, 0, wallThickness, windowHeight, rl.DarkGray),
 	}
 
+	maxReflections := 3
+
 	for !rl.WindowShouldClose() {
 		character.Update()
 		character.CheckWallCollision(walls)
 
 		mousePos := rl.GetMousePosition()
 		direction := rl.Vector2Subtract(mousePos, character.Position)
-
-		rayStart, rayEnd := character.CastRay(direction, 1000)
-		hit, hitPoint, normal, wallIndex := character.CheckRayWallCollision(rayStart, rayEnd, walls)
+		startingPoint := character.Position
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Violet)
@@ -49,15 +49,20 @@ func main() {
 			wall.Draw()
 		}
 
-		if hit {
-			// Draw hit point
-			rl.DrawCircleV(hitPoint, 5, rl.Red)
-			// Draw normal line
-			normalEnd := rl.Vector2Add(hitPoint, rl.Vector2Scale(normal, 200))
-			rl.DrawLineV(hitPoint, normalEnd, rl.Blue)
+		for range maxReflections {
+			rayStart, rayEnd := character.CastRay(startingPoint, direction, 1000)
+			hit, hitPoint, normal, _ := character.CheckRayWallCollision(rayStart, rayEnd, walls)
 
-			rl.DrawText(fmt.Sprintf("Hit Wall: %d", wallIndex), 25, 75, 16, rl.Blue)
-			rl.DrawText(fmt.Sprintf("Normal: x: %g y: %g", normal.X, normal.Y), 25, 100, 16, rl.Blue)
+			if hit {
+				rl.DrawCircleV(hitPoint, 5, rl.Red)
+				normalEnd := rl.Vector2Add(hitPoint, rl.Vector2Scale(normal, 100))
+				rl.DrawLineV(hitPoint, normalEnd, rl.Blue)
+				reflect := rl.Vector2Subtract(direction, rl.Vector2Scale(rl.Vector2Scale(normal, normal.X*direction.X+normal.Y*direction.Y), 2))
+				reflectEnd := rl.Vector2Add(hitPoint, rl.Vector2Scale(reflect, 100))
+				rl.DrawLineV(hitPoint, reflectEnd, rl.Green)
+				direction = reflect
+				startingPoint = hitPoint
+			}
 		}
 
 		character.Draw()

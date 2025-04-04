@@ -49,14 +49,14 @@ func (c *Character) Update() {
 	}
 }
 
-func (c *Character) CastRay(direction rl.Vector2, maxLength float32) (rl.Vector2, rl.Vector2) {
+func (c *Character) CastRay(starting, direction rl.Vector2, maxLength float32) (rl.Vector2, rl.Vector2) {
 	normarlize := rl.Vector2Normalize(direction)
 
 	rayEnd := rl.NewVector2(
-		c.Position.X+normarlize.X*maxLength,
-		c.Position.Y+normarlize.Y*maxLength)
+		starting.X+normarlize.X*maxLength,
+		starting.Y+normarlize.Y*maxLength)
 
-	return c.Position, rayEnd
+	return starting, rayEnd
 }
 
 func (c *Character) CheckRayWallCollision(rayStart, rayEnd rl.Vector2, walls []wall.Wall) (bool, rl.Vector2, rl.Vector2, int) {
