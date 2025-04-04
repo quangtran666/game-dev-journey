@@ -40,13 +40,24 @@ func main() {
 		direction := rl.Vector2Subtract(mousePos, character.Position)
 
 		rayStart, rayEnd := character.CastRay(direction, 1000)
-		character.CheckRayWallCollision(rayStart, rayEnd, walls)
+		hit, hitPoint, normal, wallIndex := character.CheckRayWallCollision(rayStart, rayEnd, walls)
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Violet)
 
 		for _, wall := range walls {
 			wall.Draw()
+		}
+
+		if hit {
+			// Draw hit point
+			rl.DrawCircleV(hitPoint, 5, rl.Red)
+			// Draw normal line
+			normalEnd := rl.Vector2Add(hitPoint, rl.Vector2Scale(normal, 200))
+			rl.DrawLineV(hitPoint, normalEnd, rl.Blue)
+
+			rl.DrawText(fmt.Sprintf("Hit Wall: %d", wallIndex), 25, 75, 16, rl.Blue)
+			rl.DrawText(fmt.Sprintf("Normal: x: %g y: %g", normal.X, normal.Y), 25, 100, 16, rl.Blue)
 		}
 
 		character.Draw()

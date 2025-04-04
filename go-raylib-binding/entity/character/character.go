@@ -1,7 +1,6 @@
 package character
 
 import (
-	"fmt"
 	"math"
 
 	"mygame/enviroment/wall"
@@ -61,8 +60,13 @@ func (c *Character) CastRay(direction rl.Vector2, maxLength float32) (rl.Vector2
 }
 
 func (c *Character) CheckRayWallCollision(rayStart, rayEnd rl.Vector2, walls []wall.Wall) (bool, rl.Vector2, rl.Vector2, int) {
+	closestHit := false
+	closestPoint := rl.NewVector2(0, 0)
+	cloestDistance := float32(math.MaxFloat32)
+	cloestWallIndex := -1
+
 	rl.DrawLineV(rayStart, rayEnd, rl.Brown)
-	for _, wall := range walls {
+	for i, wall := range walls {
 		topLeft := rl.NewVector2(wall.Rect.X, wall.Rect.Y)
 		topRight := rl.NewVector2(wall.Rect.X+wall.Rect.Width, wall.Rect.Y)
 		bottomLeft := rl.NewVector2(wall.Rect.X, wall.Rect.Y+wall.Rect.Height)
@@ -78,13 +82,36 @@ func (c *Character) CheckRayWallCollision(rayStart, rayEnd rl.Vector2, walls []w
 		for _, edge := range edges {
 			var collisionPoint rl.Vector2
 			if rl.CheckCollisionLines(rayStart, rayEnd, edge.start, edge.end, &collisionPoint) {
-				rl.DrawCircleV(collisionPoint, 30, rl.Beige)
-				fmt.Printf("Collision pos: (%v, %v)\n", collisionPoint.X, collisionPoint.Y)
+				// Tính khoảng cách từ điểm bắt đầu ray đến điểm va chạm
+				distance := rl.Vector2Distance(collisionPoint, rayStart)
+
+				if distance < cloestDistance {
+					cloestDistance = distance
+					closestPoint = collisionPoint
+					closestHit = true
+					cloestWallIndex = i
+				}
 			}
 		}
 	}
 
-	return false, rl.Vector2{}, rl.Vector2{}, -1 // Return false if no collision is detected
+	normal := rl.NewVector2(0, 0)
+	if closestHit {
+		// Dựa vào tường va chạm để xác định pháp tuyến
+		wall := walls[cloestWallIndex]
+
+		if math.Abs(float64(closestPoint.X-wall.Rect.X)) < 0.1 {
+			normal = rl.NewVector2(-1, 0) // Va chạm với tường trái
+		} else if math.Abs(float64(closestPoint.X-(wall.Rect.X+wall.Rect.Width))) < 0.1 {
+			normal = rl.NewVector2(1, 0) // Va chạm với tường phải
+		} else if math.Abs(float64(closestPoint.Y-wall.Rect.Y)) < 0.1 {
+			normal = rl.NewVector2(0, -1) // Va chạm với tường dưới
+		} else if math.Abs(float64(closestPoint.Y-(wall.Rect.Y+wall.Rect.Height))) < 0.1 {
+			normal = rl.NewVector2(0, 1) // Va chạm với tường trên
+		}
+	}
+
+	return closestHit, closestPoint, normal, cloestWallIndex
 }
 
 func (c *Character) CheckWallCollision(walls []wall.Wall) {
